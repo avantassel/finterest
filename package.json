@@ -21,6 +21,7 @@
     "amortize": "avantassel/amortize",
     "chalk": "^1.1.3",
     "numeral": "^2.0.1",
-    "prompt": "^1.0.0"
+    "prompt": "^1.0.0",
+    "quandl": "0.0.6"
   }
 }

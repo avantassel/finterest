@@ -2,13 +2,42 @@ var amortize = require('amortize');
 var prompt = require('prompt');
 var chalk = require('chalk');
 var numeral = require('numeral');
+var Quandl = require("quandl");
+var quandl = new Quandl();
+
+console.log('Getting Current Interest Rates ...');
+
+quandl.dataset({ source: "FMAC", table: "FIX30YR" }, function(err, response){
+    if(err)
+        throw err;
+
+    var response30 = JSON.parse(response);
+
+    quandl.dataset({ source: "FMAC", table: "FIX15YR" }, function(err, response){
+      if(err)
+          throw err;
+
+    var response15 = JSON.parse(response);
+
+console.log(
+`
+${chalk.bold('Freddie Mac 30 Year Rate as of '+response30.dataset.data[0][0]+' '+response30.dataset.data[0][1]+'%')}
+${chalk.bold('Freddie Mac 15 Year Rate as of '+response15.dataset.data[0][0]+' '+response15.dataset.data[0][1]+'%')}
+`);
 
 prompt.start();
 
-prompt.get(['amount', 'rate', 'principalPayment'], function (err, result) {
+var prompts = [
+  { name: 'amount', default: 200000}
+  ,{ name: 'rate30yr', default: response30.dataset.data[0][1]}
+  ,{ name: 'rate15yr', default: response15.dataset.data[0][1]}
+  ,{ name: 'principalPayment', default: 200}
+];
+
+prompt.get(prompts, function (err, result) {
     var amz30p = amortize({
       amount: result.amount,
-      rate: result.rate,
+      rate: result.rate30yr,
       totalTerm: 360,
       amortizeTerm: 360,
       principalPayment: result.principalPayment
@@ -16,14 +45,14 @@ prompt.get(['amount', 'rate', 'principalPayment'], function (err, result) {
 
     var amz30 = amortize({
       amount: result.amount,
-      rate: result.rate,
+      rate: result.rate30yr,
       totalTerm: 360,
       amortizeTerm: 360
     });
 
     var amz15p = amortize({
       amount: result.amount,
-      rate: result.rate,
+      rate: result.rate15yr,
       totalTerm: 180,
       amortizeTerm: 180,
       principalPayment: result.principalPayment
@@ -31,7 +60,7 @@ prompt.get(['amount', 'rate', 'principalPayment'], function (err, result) {
 
     var amz15 = amortize({
       amount: result.amount,
-      rate: result.rate,
+      rate: result.rate15yr,
       totalTerm: 180,
       amortizeTerm: 180
     });
@@ -78,3 +107,7 @@ ${chalk.green('Interest Saved: $ '+numeral(amz30.interest-amz15.interest).format
 `);
 
 });
+
+}); //end quandl15
+
+}); //end quandl30
