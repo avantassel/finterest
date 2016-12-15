@@ -80,12 +80,12 @@ getRates("FIX30YR")
   console.log(
   `
   ${chalk.bold('30 Year')}
-  ${chalk.yellow('Total Loan: $ '+numeral(amz30.principal+amz30.interest).format())}
+  ${chalk.yellow('Total Paid: $ '+numeral(amz30.principal+amz30.interest).format())}
   ${chalk.cyan('Monthly Payment: $ '+numeral(amz30.payment).format())}
   ${chalk.red('Interest Paid: $ '+numeral(amz30.interest).format())}
 
   ${chalk.bold('30 Year with an extra monthly principal payment')}
-  ${chalk.yellow('Total Loan: $ '+numeral(amz30p.principal+amz30p.interest).format())}
+  ${chalk.yellow('Total Paid: $ '+numeral(amz30p.principal+amz30p.interest).format())}
   ${chalk.cyan('Monthly Payment: $ '+numeral(amz30p.payment).format())}
   ${chalk.red('Interest Paid: $ '+numeral(amz30p.interest).format())}
   ${chalk.red('Extra Principal Paid: $ '+numeral(amz30p.principalPaymentsTotal).format())}
@@ -97,12 +97,12 @@ getRates("FIX30YR")
   console.log(
   `
   ${chalk.bold('15 Year')}
-  ${chalk.yellow('Total Loan: $ '+numeral(amz15.principal+amz15.interest).format())}
+  ${chalk.yellow('Total Paid: $ '+numeral(amz15.principal+amz15.interest).format())}
   ${chalk.cyan('Monthly Payment: $ '+numeral(amz15.payment).format())}
   ${chalk.red('Interest Paid: $ '+numeral(amz15.interest).format())}
 
   ${chalk.bold('15 Year with an extra monthly principal payment')}
-  ${chalk.yellow('Total Loan: $ '+numeral(amz15p.principal+amz15p.interest).format())}
+  ${chalk.yellow('Total Paid: $ '+numeral(amz15p.principal+amz15p.interest).format())}
   ${chalk.cyan('Monthly Payment: $ '+numeral(amz15p.payment).format())}
   ${chalk.red('Interest Paid: $ '+numeral(amz15p.interest).format())}
   ${chalk.red('Extra Principal Paid: $ '+numeral(amz15p.principalPaymentsTotal).format())}
