@@ -1,6 +1,6 @@
 {
   "name": "finterest",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "F-Interest is an app that tells you what you will save between 30 and 15 year loans.",
   "main": "main.js",
   "scripts": {
@@ -23,8 +23,9 @@
   "author": "Andrew Van Tassel",
   "license": "MIT",
   "dependencies": {
-    "amortize": "^0.4.0",
+    "amortize": "github:avantassel/amortize",
     "chalk": "^2.3.0",
+    "moment": "^2.22.2",
     "numeral": "^2.0.1",
     "prompt": "^1.0.0",
     "quandl": "0.0.6",

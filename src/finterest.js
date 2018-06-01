@@ -1,15 +1,18 @@
-var vow = require('vow');
-var amortize = require('amortize');
-var prompt = require('prompt');
-var chalk = require('chalk');
-var numeral = require('numeral');
-var Quandl = require("quandl");
+const vow = require('vow');
+const amortize = require('amortize');
+const prompt = require('prompt');
+const chalk = require('chalk');
+const numeral = require('numeral');
+const moment = require('moment');
+const Quandl = require("quandl");
 
 function Finterest() { };
 
 Finterest.prototype.run = function(){
 
-  var response30 = [], response15 = [];
+  var response30 = [];
+  var response15 = [];
+  var pMonths = 0;
   var quandl = new Quandl({auth_token: "Spf5bFDtFkwQ5oqCMy6J"});
 
   console.log(
@@ -50,8 +53,8 @@ Finterest.prototype.run = function(){
 
       console.log(
       `
-      ${chalk.bold('Freddie Mac 30 Year Rate as of '+response30[0]+' '+response30[1]+'%')}
-      ${chalk.bold('Freddie Mac 15 Year Rate as of '+response15[0]+' '+response15[1]+'%')}
+      ${chalk.bold('Freddie Mac 30 Year Rate as of '+response30[0]+' '+chalk.green(response30[1]+'%'))}
+      ${chalk.bold('Freddie Mac 15 Year Rate as of '+response15[0]+' '+chalk.green(response15[1]+'%'))}
       ${chalk.bold.blue('Hit enter to accept default values')}
       `);
 
@@ -98,42 +101,55 @@ Finterest.prototype.run = function(){
       // 30 year details
       console.log(
       `
-      ${chalk.bold('30 Year')}
-      ${chalk.yellow('Total Paid: $ '+numeral(amz30.principal+amz30.interest).format())}
-      ${chalk.cyan('Monthly Payment: $ '+numeral(amz30.payment).format())}
-      ${chalk.red('Interest Paid: $ '+numeral(amz30.interest).format())}
+      ${chalk.underline.bold('30 Year')}
+      ${chalk.yellow('Total Paid: $'+numeral(amz30.principal+amz30.interest).format())}
+      ${chalk.cyan('Monthly Payment: $'+numeral(amz30.payment).format())}
+      ${chalk.red('Interest Paid: $'+numeral(amz30.interest).format())}
+      ${chalk.green('Paid Off: '+moment().add(360,'M').format('MMMM YYYY'))}
 
-      ${chalk.bold('30 Year with an extra monthly principal payment')}
-      ${chalk.yellow('Total Paid: $ '+numeral(amz30p.principal+amz30p.interest).format())}
-      ${chalk.cyan('Monthly Payment: $ '+numeral(amz30p.payment).format())}
-      ${chalk.red('Interest Paid: $ '+numeral(amz30p.interest).format())}
-      ${chalk.red('Extra Principal Paid: $ '+numeral(amz30p.principalPaymentsTotal).format())}
-      ${chalk.green('Interest Saved: $ '+numeral(amz30.interest-amz30p.interest).format())}
+      ${chalk.bold('With $'+numeral(result.principalPayment).format()+' extra monthly principal payment')}
+      ${chalk.yellow('Total Paid: $'+numeral(amz30p.principal+amz30p.interest).format())}
+      ${chalk.cyan('Monthly Payment: $'+numeral(amz30p.payment).format())}
+      ${chalk.red('Interest Paid: $'+numeral(amz30p.interest).format())}
+      ${chalk.red('Extra Principal Paid: $'+numeral(amz30p.principalPaymentsTotal).format())}
+      ${chalk.green('Interest Saved: $'+numeral(amz30.interest-amz30p.interest).format())}
       ${chalk.green('Years Saved: '+numeral((amz30p.termsSaved/12).toFixed(2)).format('0.00'))}
+      ${chalk.green('Paid Off: '+moment().add(360-amz30p.termsSaved,'M').format('MMMM YYYY'))}
+      ${chalk.green('Paying more in principal starts: '+moment().add(amz30p.principalBreakingTerm, 'M').format('MMMM YYYY')+' (in '+moment().add(amz30p.principalBreakingTerm, 'M').fromNow(true)+')')}
       `);
 
       // 15 year details
       console.log(
       `
-      ${chalk.bold('15 Year')}
-      ${chalk.yellow('Total Paid: $ '+numeral(amz15.principal+amz15.interest).format())}
-      ${chalk.cyan('Monthly Payment: $ '+numeral(amz15.payment).format())}
-      ${chalk.red('Interest Paid: $ '+numeral(amz15.interest).format())}
+      ${chalk.underline.bold('15 Year')}
+      ${chalk.yellow('Total Paid: $'+numeral(amz15.principal+amz15.interest).format())}
+      ${chalk.cyan('Monthly Payment: $'+numeral(amz15.payment).format())}
+      ${chalk.red('Interest Paid: $'+numeral(amz15.interest).format())}
+      ${chalk.green('Paid Off: '+moment().add(180,'M').format('MMMM YYYY'))}
 
-      ${chalk.bold('15 Year with an extra monthly principal payment')}
-      ${chalk.yellow('Total Paid: $ '+numeral(amz15p.principal+amz15p.interest).format())}
-      ${chalk.cyan('Monthly Payment: $ '+numeral(amz15p.payment).format())}
-      ${chalk.red('Interest Paid: $ '+numeral(amz15p.interest).format())}
-      ${chalk.red('Extra Principal Paid: $ '+numeral(amz15p.principalPaymentsTotal).format())}
-      ${chalk.green('Interest Saved: $ '+numeral(amz15.interest-amz15p.interest).format())}
+      ${chalk.bold('With $'+numeral(result.principalPayment).format()+' extra monthly principal payment')}
+      ${chalk.yellow('Total Paid: $'+numeral(amz15p.principal+amz15p.interest).format())}
+      ${chalk.cyan('Monthly Payment: $'+numeral(amz15p.payment).format())}
+      ${chalk.red('Interest Paid: $'+numeral(amz15p.interest).format())}
+      ${chalk.red('Extra Principal Paid: $'+numeral(amz15p.principalPaymentsTotal).format())}
+      ${chalk.green('Interest Saved: $'+numeral(amz15.interest-amz15p.interest).format())}
       ${chalk.green('Years Saved: '+numeral((amz15p.termsSaved/12).toFixed(2)).format('0.00'))}
+      ${chalk.green('Paid Off: '+moment().add(180-amz15p.termsSaved,'M').format('MMMM YYYY'))}
+      ${chalk.green('Paying more in principal starts: '+moment().add(amz15p.principalBreakingTerm, 'M').format('MMMM YYYY')+' (in '+moment().add(amz15p.principalBreakingTerm, 'M').fromNow(true)+')')}
       `);
 
       // Diff
       console.log(
       `
-      ${chalk.bold('15 Year vs 30 Year')}
-      ${chalk.green('Interest Saved: $ '+numeral(amz30.interest-amz15.interest).format())}
+      ${chalk.underline.bold('15 Year vs 30 Year Difference')}
+      ${chalk.cyan('Monthly Difference: $'+numeral(amz30.payment-amz15.payment).format())}
+      ${chalk.green('$'+numeral(amz30.interest-amz15.interest).format()+' will be saved in interest!')}
+      ${chalk.green('Paying more in principal than interest starts '+moment().add(amz15.principalBreakingTerm, 'M').to(moment().add(amz30.principalBreakingTerm, 'M'), true)+' sooner')}
+
+      ${chalk.bold('With $'+numeral(result.principalPayment).format()+' extra monthly principal payment')}
+      ${chalk.cyan('Monthly Difference: $'+numeral(amz30p.payment-amz15p.payment).format())}
+      ${chalk.green('$'+numeral(amz30p.interest-amz15p.interest).format()+' will be saved in interest!')}
+      ${chalk.green('Paying more in principal than interest starts '+moment().add(amz15p.principalBreakingTerm, 'M').to(moment().add(amz30p.principalBreakingTerm, 'M'), true)+' sooner')}
       `);
     });
   });
