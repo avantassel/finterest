@@ -30,6 +30,46 @@ Finterest.prototype.run = function(){
     return deferred.promise();
   }
 
+  function validateResults(result){
+    var valid = true;
+    if(isNaN(result.amount)){
+      console.log(
+      `
+      ${chalk.bold.red('Amount "'+result.amount+'" is not a number')}
+      `);
+      valid = false;
+    }
+    if(isNaN(result.downPayment)){
+      console.log(
+      `
+      ${chalk.bold.red('Down Payment "'+result.downPayment+'" is not a number')}
+      `);
+      valid = false;
+    }
+    if(isNaN(result.rate30yr)){
+      console.log(
+      `
+      ${chalk.bold.red('30 Year Rate "'+result.rate30yr+'" is not a number')}
+      `);
+      valid = false;
+    }
+    if(isNaN(result.rate15yr)){
+      console.log(
+      `
+      ${chalk.bold.red('15 Year Rate "'+result.rate15yr+'" is not a number')}
+      `);
+      valid = false;
+    }
+    if(isNaN(result.principalPayment)){
+      console.log(
+      `
+      ${chalk.bold.red('Principal Payment "'+result.principalPayment+'" is not a number')}
+      `);
+      valid = false;
+    }
+    return valid;
+  }
+
   getRates("FIX30YR")
     .then(function(response){
       if(response && response.dataset){
@@ -53,8 +93,8 @@ Finterest.prototype.run = function(){
 
       console.log(
       `
-      ${chalk.bold('Freddie Mac 30 Year Rate as of '+response30[0]+' '+chalk.green(response30[1]+'%'))}
-      ${chalk.bold('Freddie Mac 15 Year Rate as of '+response15[0]+' '+chalk.green(response15[1]+'%'))}
+      ${chalk.bold('Freddie Mac 30 Year Rate '+response30[0]+' ('+moment(new Date(response30[0])).fromNow()+') '+chalk.green(response30[1]+'%'))}
+      ${chalk.bold('Freddie Mac 15 Year Rate '+response15[0]+' ('+moment(new Date(response15[0])).fromNow()+') '+chalk.green(response15[1]+'%'))}
       ${chalk.bold.blue('Hit enter to accept default values')}
       `);
 
@@ -62,57 +102,76 @@ Finterest.prototype.run = function(){
 
       var prompts = [
         { name: 'amount', message: 'Enter the amount of your loan $200,000:', default: 200000}
+        ,{ name: 'downPayment', message: 'Enter a down payment 0%:', default: 0}
         ,{ name: 'rate30yr', message: 'Enter the 30 year rate '+response30[1]+'%', default: response30[1]}
         ,{ name: 'rate15yr', message: 'Enter the 15 year rate '+response15[1]+'%', default: response15[1]}
         ,{ name: 'principalPayment', message: 'Enter the amount of your monthly principal payment $200:', default: 200}
       ];
+      var downPaymentAmount = 0;
 
       prompt.get(prompts, function (err, result) {
 
-          // ensure number
-          result.amount = +result.amount;
-          result.rate30yr = +result.rate30yr;
-          result.rate15yr = +result.rate15yr;
-          result.principalPayment = +result.principalPayment;
+      if(!validateResults(result)){
+        return false;
+      }
+      // ensure number
+      result.amount = +result.amount;
+      result.downPayment = +result.downPayment;
+      result.rate30yr = +result.rate30yr;
+      result.rate15yr = +result.rate15yr;
+      result.principalPayment = +result.principalPayment;
 
-          var amz30 = amortize({
-            amount: result.amount,
-            rate: result.rate30yr,
-            totalTerm: 360,
-            amortizeTerm: 360
-          });
+    // update amount if there is a down payment
+    if(result.downPayment && result.downPayment < 100){
+      downPaymentAmount = (result.amount * (result.downPayment/100));
+      console.log(
+      `
+      ${chalk.bgBlue.bold('Loan Summary with Down Payment')}
+      ${chalk('With a $'+numeral(result.amount).format('0,0,0.00')+' loan and '+result.downPayment+'% or $'+numeral(downPaymentAmount).format('0,0,0.00')+' down payment.')}
+      ${chalk('We are now looking at a loan amount of $'+numeral(result.amount - downPaymentAmount).format('0,0,0.00'))}
+      `);
+      // update amount less the downPayment
+      result.amount = result.amount - downPaymentAmount;
+    }
 
-          var amz30p = amortize({
-            amount: result.amount,
-            rate: result.rate30yr,
-            totalTerm: 360,
-            amortizeTerm: 360,
-            principalPayment: result.principalPayment
-          });
-          // update 30 yr payment with principal
-          amz30p.payment = amz30.payment + result.principalPayment;
+      var amz30 = amortize({
+        amount: result.amount,
+        rate: result.rate30yr,
+        totalTerm: 360,
+        amortizeTerm: 360
+      });
 
-          var amz15 = amortize({
-            amount: result.amount,
-            rate: result.rate15yr,
-            totalTerm: 180,
-            amortizeTerm: 180
-          });
+      var amz30p = amortize({
+        amount: result.amount,
+        rate: result.rate30yr,
+        totalTerm: 360,
+        amortizeTerm: 360,
+        principalPayment: result.principalPayment
+      });
+      // update 30 yr payment with principal
+      amz30p.payment = amz30.payment + result.principalPayment;
 
-          var amz15p = amortize({
-            amount: result.amount,
-            rate: result.rate15yr,
-            totalTerm: 180,
-            amortizeTerm: 180,
-            principalPayment: result.principalPayment
-          });
-          // update 15 yr payment with principal
-          amz15p.payment = amz15.payment + result.principalPayment;
+      var amz15 = amortize({
+        amount: result.amount,
+        rate: result.rate15yr,
+        totalTerm: 180,
+        amortizeTerm: 180
+      });
+
+      var amz15p = amortize({
+        amount: result.amount,
+        rate: result.rate15yr,
+        totalTerm: 180,
+        amortizeTerm: 180,
+        principalPayment: result.principalPayment
+      });
+      // update 15 yr payment with principal
+      amz15p.payment = amz15.payment + result.principalPayment;
 
       // 30 year details
       console.log(
       `
-      ${chalk.underline.bold('30 Year @ '+result.rate30yr+'%')}
+      ${chalk.bgBlue.bold('30 Year @ '+result.rate30yr+'%')}
       ${chalk.yellow('Total Paid: $'+numeral(amz30.principal+amz30.interest).format('0,0,0.00'))}
       ${chalk.cyan('Monthly Payment: $'+numeral(amz30.payment).format('0,0.00'))}
       ${chalk.red('Interest Paid: $'+numeral(amz30.interest).format('0,0.00'))}
@@ -133,7 +192,7 @@ Finterest.prototype.run = function(){
       // 15 year details
       console.log(
       `
-      ${chalk.underline.bold('15 Year @ '+result.rate15yr+'%')}
+      ${chalk.bgBlue.bold('15 Year @ '+result.rate15yr+'%')}
       ${chalk.yellow('Total Paid: $'+numeral(amz15.principal+amz15.interest).format('0,0.00'))}
       ${chalk.cyan('Monthly Payment: $'+numeral(amz15.payment).format('0,0.00'))}
       ${chalk.red('Interest Paid: $'+numeral(amz15.interest).format('0,0.00'))}
@@ -154,7 +213,7 @@ Finterest.prototype.run = function(){
       // Diff
       console.log(
       `
-      ${chalk.underline.bold('15 Year vs 30 Year Difference')}
+      ${chalk.bgBlue.bold('15 Year vs 30 Year Difference')}
       ${chalk.cyan('Monthly Difference: $'+numeral(amz30.payment-amz15.payment).format('0,0.00'))}
       ${chalk.green('$'+numeral(amz30.interest-amz15.interest).format('0,0.00')+' will be saved in interest!')}
       ${chalk.green('Paying more in principal than interest starts '+moment().add(amz15.principalBreakingTerm, 'M').to(moment().add(amz30.principalBreakingTerm, 'M'), true)+' sooner')}

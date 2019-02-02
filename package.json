@@ -1,6 +1,6 @@
 {
   "name": "finterest",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "F-Interest is an app that tells you what you will save between 30 and 15 year loans.",
   "main": "main.js",
   "scripts": {
