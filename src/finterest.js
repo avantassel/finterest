@@ -16,9 +16,8 @@ Finterest.prototype.run = function(){
   var quandl = new Quandl({auth_token: "Spf5bFDtFkwQ5oqCMy6J"});
 
   console.log(
-  `
-  ${chalk.bold('Getting Current Interest Rates...')}
-  `);
+      `
+      ${chalk.bold('Getting Current Interest Rates...')}`);
 
   function getRates(term){
     var deferred = vow.defer();
