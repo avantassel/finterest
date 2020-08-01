@@ -1,7 +1,7 @@
 {
   "name": "finterest",
-  "version": "1.0.4",
-  "description": "F-Interest is an app that tells you what you will save between 30 and 15 year loans.",
+  "version": "1.0.5",
+  "description": "F-Interest is an app that tells you what you will save between 30 and 15 year loans.  Or you can enter a custom monthly rate and number of months. ",
   "main": "main.js",
   "scripts": {
     "start": "node main.js",
